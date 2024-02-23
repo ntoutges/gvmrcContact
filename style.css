@@ -1,0 +1,156 @@
+body {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+
+  width: 100vw;
+  height: 100vh;
+  margin: 0px;
+  padding: 0px;
+  background-color: cornsilk;
+}
+
+.contacts {
+  display: grid;
+  gap: 10px;
+}
+
+@media (min-width: 400px) {
+  .contacts {
+    display: grid;
+
+    grid-template-areas:
+      'response subject subject'
+      'content content other';
+
+    grid-template-rows: min-content auto;
+    grid-template-columns: auto auto min-content;
+
+    gap: 10px;
+  }
+}
+
+@media (max-width: 400px) {
+  .contacts {
+    grid-template-areas:
+      'subject'
+      'response'
+      'content'
+      'other';
+
+    grid-template-rows: auto auto auto;
+    grid-template-columns: auto;
+  }
+}
+
+.contact-responses {
+  grid-area: response;
+  display: flex;
+  flex-direction: column;
+
+  padding: 5px;
+  gap: 2px;
+
+  background: #b9b9b9;
+}
+
+.contact-responses>input {
+  border: none;
+  border-bottom: solid black 1px;
+}
+
+.contact-subjects {
+  grid-area: subject;
+}
+
+.contact-contents {
+  grid-area: content;
+
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+
+.contact-contents-text {
+  height: auto !important;
+  flex-grow: 1;
+}
+
+.contact-others {
+  grid-area: other;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.contact-others>div {
+  background: #c7e4e9;
+}
+
+.contact-other-topic-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.contact-other-topics {
+  padding: 8px;
+  background: lightblue;
+  user-select: none;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.contact-other-topics:hover {
+  background: yellow;
+  cursor: pointer;
+}
+
+.contact-other-topics.selected {
+  background: rgb(182, 224, 158);
+}
+
+.contact-other-topics:hover.selected {
+  background: rgb(237, 250, 140);
+}
+
+.contact-other-senders {
+  user-select: none;
+  padding: 10px;
+}
+
+.contact-other-senders:hover {
+  background: lightgreen;
+  cursor: pointer;
+}
+
+.contact-center-align {
+  position: relative;
+  display: inline-block;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.contact-subject-texts {
+  width: calc(100% - 10px);
+  height: calc(100% - 12px);
+  padding: 5px;
+  border: none;
+  border-bottom: solid black 2px;
+  margin: 0px;
+
+  font-size: 40px;
+}
+
+.contact-contents-warnings {
+  padding: 2px;
+  background: #ffeaee;
+  color: #dd0000;
+}
+
+.contact-contents-warnings:empty {
+  display: none;
+}
