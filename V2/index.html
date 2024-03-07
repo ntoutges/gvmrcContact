@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Contact</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Magic fix for width on mobile getting stuck at 980px -->
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+      :root {
+        --color-main: #802000;
+      }
+
+      body {
+        height: calc(100vh - 18px);
+        width: calc(100vw - 18px);
+        border: solid 4px var(--color-main);
+
+        padding: 5px;
+        margin: 0px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+
+        font-size: 40px;
+        min-width: 0px;
+
+        font-family: Roboto, sans-serif;
+      }
+      
+      #contact-container {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        gap: 5px;
+      }
+
+      .contacts {
+        flex: 1 1 0;
+        width: 100%;
+        border: none;
+        background: var(--color-main);
+        padding: 5px;
+        color: white;
+
+        font-size: 1em;
+        font-family: inherit;
+      }
+      .contacts:focus {
+        outline: none;
+      }
+      .contacts::placeholder {
+        color: lightgrey;
+      }
+
+      #message {
+        resize: none;
+        flex: 1 1 0;
+        font-size: 1em;
+        border: none;
+        margin: 0px;
+        padding: 5px;
+
+        color: black;
+        font-family: inherit;
+
+        background: transparent;
+      }
+
+      #message:focus {
+        outline: none;
+      }
+
+      #send {
+        font-size: 1em;
+        background: var(--color-main);
+        
+        color: white;
+        font-family: inherit;
+      }
+
+      #warning {
+        overflow: hidden;
+        font-size: 1em;
+        background: linear-gradient(45deg, #ffdae0, #ffeaea);
+        padding: 3px;
+        border-top: solid 2px var(--color-main);
+        color: #802000;
+        margin-bottom: -5px; /* counteract gap */
+      }
+
+      #warning:empty {
+        display: none;
+      }
+
+      @media (max-width: 600px) {
+        #contact-container {
+          flex-direction: column;
+        }
+
+        .contacts {
+          width: unset;
+        }
+      }
+
+      @media (max-height: 350px) or (max-width: 600px) {
+        .contacts,
+        #message,
+        #warning,
+        #send {
+          font-size: 0.6em;
+        }
+      }
+
+      @media (max-height: 350px) and (max-width: 600px) {
+        .contacts,
+        #message,
+        #warning,
+        #send { /* even smaller */
+          font-size: 0.3em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="contact-container">
+      <input class="contacts" id="email" placeholder="you@email.com" type="email">
+      <input class="contacts" id="phone" placeholder="(555)-555-5555" type="tel">
+    </div>
+    <textarea id="message" placeholder="What do you want to tell us?"></textarea>
+    <div id="warning"></div>
+    <button id="send">Send!</button>
+
+    <script>
+      const API_URL = "https://pcv49zgqk3.execute-api.us-east-1.amazonaws.com/default/mailer";
+      const $ = document.querySelector.bind(document);
+
+      $("#send").addEventListener("click", () => {
+        const email = $("#email").value.trim();
+        const phone = $("#phone").value.trim();
+        const body = $("#message").value.trim();
+
+        if (!email && !phone) { // email *and* phone left empty
+          $("#warning").textContent = "Contact information missing.";
+          return;
+        }
+        if (!body) { // no message entered
+          $("#warning").textContent = "Please enter a message.";
+          return;
+        }
+
+        $("#warning").value = "";
+        $("#send").textContent = "Sending...";
+        getReq(API_URL, {
+          email,
+          phone,
+          body
+        }).catch(() => { }).finally(() => { // due to "no-cors" mode, any response is hidden (annoyingly), so program cannot act on this
+          $("#send").textContent = "Success!"; // sadly, no actually way to check for success due to CORS
+          
+          // reset
+          $("#email").value = "";
+          $("#phone").value = "";
+          $("#message").value = "";
+          
+          setTimeout(() => {
+            $("#send").textContent = "Send!";
+          }, 2000);
+        });
+      });
+
+      function getReq(path, data = {}) {
+        const queryStrings = [];
+        for (let key in data) {
+          queryStrings.push(`${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`);
+        }
+        const queryString = queryStrings.join("&");
+        return new Promise((res, rej) => {
+          fetch((queryString.length == 0) ? path : (path + "?" + queryString), {
+            method: "GET",
+            mode: "no-cors",
+            headers: {
+              "Content-Type": "application/json"
+            }
+          }).then((response) => {
+            response.text().then((data) => {
+              if (response.status >= 200 && response.status < 300) { // success band
+                try {
+                  res(JSON.parse(data));
+                } // attempt to convert to JSON
+                catch (err) {
+                  res(data);
+                } // if conversion fails, just send raw txt
+              }
+              else { // failure (of some sort)
+                rej(data);
+              }
+            }).catch(err => {
+              rej(err);
+            });
+          }).catch(err => { rej(err); }); // not sure if this actually does anything...
+        });
+      }
+    </script>
+  </body>
+</html>
